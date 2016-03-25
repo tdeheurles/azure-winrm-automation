@@ -8,8 +8,16 @@
 
 param
 (
-    [Parameter(Mandatory = $true)]
-    [string] $HostName
+    [Parameter(Mandatory=$true,Position=0)]
+    [string] $HostName,
+    [Parameter(Mandatory=$true,Position=1)]
+    [string] $WinRmPort,
+    [Parameter(Mandatory=$True,Position=2)]
+    [string] $AccountStorageName,
+    [Parameter(Mandatory=$True,Position=3)]
+    [string] $AccountStorageKey,
+    [Parameter(Mandatory=$True,Position=4)]
+    [string] $ShareFileName
 )
 
 #################################################################################################################################
@@ -80,4 +88,13 @@ Configure-WinRMHttpsListener $HostName $port
 Add-FirewallException -port $winrmHttpsPort
 
 #################################################################################################################################
+#                                               Setup NET USE                                                                   #
 #################################################################################################################################
+
+cmdkey /add:$accountStorageName.file.core.windows.net `
+    /user:$accountStorageName                         `
+    /pass:$accountStorageKey
+
+net use w:                                                     `
+    \\$accountStorageName.file.core.windows.net\$shareFileName `
+    /user:$accountStorageName $accountStorageKey
